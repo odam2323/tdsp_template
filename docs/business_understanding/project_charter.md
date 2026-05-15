@@ -18,7 +18,7 @@
 
 ### Excluye:
 
-- [El sistema no está diseñado para identificar enfermedades cerebrovasculares, infecciones (como abscesos) o enfermedades neurodegenerativas que no presenten masas tumorales dentro de las 4 categorías del dataset.]
+- [El sistema no está diseñado para identificar enfermedades cerebrovasculares, infecciones (como abscesos) o enfermedades neurodegenerativas que no presenten masas tumorales dentro de las 4 categorías del dataset.] 
 
 ## Metodología
 
