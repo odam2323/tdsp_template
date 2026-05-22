@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from skimage.feature import hog
 
+from kaggle_prepare import preparar_dataset_kaggle
+
 # --- SOLUCIÓN PARA BLOQUEO EN MACOS ---
 # Limita el uso de hilos para evitar conflictos con librerías del sistema
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -69,7 +71,9 @@ def guardar_dataset(X, y, nombre_archivo):
     print(f"Dataset guardado en: {ruta_archivo}", flush=True)
 
 if __name__ == "__main__":
+    preparar_dataset_kaggle()
     if not DATA_DIR.exists():
+        
         print(f"Error crítico: No se encuentra la carpeta de datos en {DATA_DIR}", flush=True)
         sys.exit(1)
 
