@@ -18,17 +18,39 @@ La variable objetivo es de tipo categórica nominal y corresponde al tipo de dia
 
 ### Métricas de evaluación
 
+Para medir el desempeño global y balanceado del clasificador, se utilizaron las métricas de Accuracy (Exactitud) para cuantificar el porcentaje total de aciertos sobre el dataset, junto con Precision (Precisión) y Recall (Sensibilidad) calculadas por clase para evaluar la capacidad del modelo de mitigar falsos positivos y falsos negativos, respectivamente. Adicionalmente, se analiza el F1-Score como la media armónica que pondera equitativamente la precisión y la sensibilidad, permitiendo identificar con rigor científico qué afecciones tumorales presentan mayor dificultad de discriminación estructural.
+
 ### Resultados de evaluación
 
-Tabla que muestra los resultados de evaluación del modelo baseline, incluyendo las métricas de evaluación.
+Los resultados de la evaluación fueron los siguientes:
+
+[MATRIZ DE CONFUSIÓN]
+[[263  71  58   8]
+ [  6 361  13  20]
+ [  0   0 400   0]
+ [  2  11   0 387]]
+
+[REPORTE DE CLASIFICACIÓN]
+precision recall f1-score support
+
+      glioma       0.97      0.66      0.78       400
+
+meningioma 0.81 0.90 0.86 400
+notumor 0.85 1.00 0.92 400
+pituitary 0.93 0.97 0.95 400
+
+    accuracy                           0.88      1600
+
+macro avg 0.89 0.88 0.88 1600
+weighted avg 0.89 0.88 0.88 1600
 
 ## Análisis de los resultados
 
-Descripción de los resultados del modelo baseline, incluyendo fortalezas y debilidades del modelo.
+Los resultados demuestran que el baseline alcanza un rendimiento global competitivo del 88%, consolidando como su mayor fortaleza la identificación de pacientes sanos y tumores de pituitaria debido a sus marcadas diferencias geométricas y de contraste en los gradientes. Sin embargo, la debilidad crítica del modelo radica en su incapacidad para discriminar los bordes difusos y las texturas internas que separan a los Gliomas de los Meningiomas. Al depender exclusivamente de características estadísticas estáticas hechas a mano (HOG), el clasificador lineal SVM se ve superado por la naturaleza infiltrativa del Glioma, el cual simula la densidad de un tejido sano o adopta fronteras morfológicas ambiguas que confunden los histogramas de gradientes.
 
 ## Conclusiones
 
-Conclusiones generales sobre el rendimiento del modelo baseline y posibles áreas de mejora.
+El modelo baseline cumple con creces el objetivo de establecer un umbral mínimo de comparación, demostrando que los patrones de forma básicos resuelven gran parte del problema pero fallan en los escenarios médicos de alta complejidad. Para mitigar la debilidad diagnóstica observada en la clase Glioma, queda plenamente justificado avanzar hacia el modelo final basado en EfficientNetV2-S, cuya arquitectura convolucional profunda y dinámica aprenderá jerarquías de texturas abstractas y sutiles imposibles de capturar con HOG. El uso de capas de atención en el modelo final será mandatorio para forzar a la red a concentrarse en las microestructuras limítrofes entre Gliomas y Meningiomas, elevando la sensibilidad clínica general.
 
 ## Referencias
 
