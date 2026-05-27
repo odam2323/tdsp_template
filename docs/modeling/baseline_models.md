@@ -4,21 +4,19 @@ Este documento contiene los resultados del modelo baseline.
 
 ## Descripción del modelo
 
-El modelo baseline es el primer modelo construido y se utiliza para establecer una línea base para el rendimiento de los modelos posteriores.
+El modelo baseline consiste en un clasificador tradicional Support Vector Machine (SVM) con kernel de Función de Base Radial (RBF), seleccionado por su alta efectividad para resolver problemas de clasificación multiclase en espacios de alta dimensionalidad. Este modelo no aprende características visuales de forma autónoma, sino que utiliza vectores de características extraídos manualmente mediante el algoritmo HOG (Histogram of Oriented Gradients), estableciendo así una línea base clásica de aprendizaje supervisado para comparar el rendimiento frente a las arquitecturas de aprendizaje profundo posteriores.
 
 ## Variables de entrada
 
-Lista de las variables de entrada utilizadas en el modelo.
+La variable de entrada consiste en un vector unidimensional de características estructurales estáticas, generado tras aplicar el descriptor HOG sobre las imágenes de resonancia magnética previamente normalizadas y redimensionadas. Este vector condensa la distribución de las orientaciones de los gradientes de intensidad lumínica dentro de celdas locales de la imagen, capturando de forma explícita los contornos, formas geométricas y discontinuidades anatómicas del cerebro sin arrastrar la carga computacional de los píxeles en bruto.
 
 ## Variable objetivo
 
-Nombre de la variable objetivo utilizada en el modelo.
+La variable objetivo es de tipo categórica nominal y corresponde al tipo de diagnóstico o hallazgo patológico presente en la resonancia magnética, codificada mediante One-Hot Encoding en cuatro clases mutuamente excluyentes: Glioma, Meningioma, Pituitary (tumor de pituitaria) y Sin tumor.
 
 ## Evaluación del modelo
 
 ### Métricas de evaluación
-
-Descripción de las métricas utilizadas para evaluar el rendimiento del modelo.
 
 ### Resultados de evaluación
 
