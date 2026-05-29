@@ -1,22 +1,30 @@
-import os
-import hashlib
+import sys
 from pathlib import Path
+import hashlib
 
 import cv2
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from skimage.feature import hog
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
-
 # =========================================================
-# CONFIGURACIÓN
+# CONFIGURACIÓN DE PATH (IMPORTANTE)
 # =========================================================
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_DIR))
+
+from src.brain_tumor_classifier.visualization.plots import (
+    plot_distribucion_clases,
+    plot_train_test,
+    plot_muestras,
+    plot_intensidad,
+    plot_pca,
+    plot_hog
+)
 
 DATA_DIR = ROOT_DIR / "docs" / "data" / "datos"
 
@@ -33,7 +41,6 @@ VALID_EXTENSIONS = [
     ".tif"
 ]
 
-
 # =========================================================
 # CARGA METADATA
 # =========================================================
@@ -48,11 +55,10 @@ def cargar_metadata():
     ):
 
         if not split_dir.exists():
-
-            print(f"\nNo existe: {split_dir}")
+            print(f"\n❌ No existe: {split_dir}")
             continue
 
-        print(f"\nLeyendo: {split_dir}")
+        print(f"\n📂 Leyendo: {split_dir}")
 
         for clase_dir in split_dir.iterdir():
 
@@ -60,7 +66,6 @@ def cargar_metadata():
                 continue
 
             clase = clase_dir.name
-
             contador = 0
 
             for img_path in clase_dir.rglob("*"):
@@ -85,13 +90,9 @@ def cargar_metadata():
 # =========================================================
 
 def calcular_hash(path):
-
     try:
-
         with open(path, "rb") as f:
-
             return hashlib.md5(f.read()).hexdigest()
-
     except:
         return None
 
@@ -102,18 +103,12 @@ def calcular_hash(path):
 
 def extraer_hog(path):
 
-    img = cv2.imread(
-        path,
-        cv2.IMREAD_GRAYSCALE
-    )
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
     if img is None:
         return None
 
-    img = cv2.resize(
-        img,
-        IMG_SIZE
-    )
+    img = cv2.resize(img, IMG_SIZE)
 
     features = hog(
         img,
@@ -127,407 +122,186 @@ def extraer_hog(path):
 
 
 # =========================================================
-# CARGAR DATASET
+# MAIN
 # =========================================================
 
-df = cargar_metadata()
+def main():
 
-if df.empty:
+    df = cargar_metadata()
 
-    print("\nDataset vacío.")
-    exit()
+    if df.empty:
+        print("\n❌ Dataset vacío.")
+        return
 
+    # =====================================================
+    # INFORMACIÓN GENERAL
+    # =====================================================
 
-# =========================================================
-# INFORMACIÓN GENERAL
-# =========================================================
+    print("\n==============================")
+    print("INFORMACIÓN GENERAL")
+    print("==============================\n")
 
-print("\n==============================")
-print("INFORMACIÓN GENERAL")
-print("==============================\n")
+    print(df.head())
 
-print(df.head())
+    print("\nTotal imágenes:", len(df))
 
-print("\nTotal imágenes:")
-print(len(df))
+    print("\nDistribución por split:")
+    print(df["split"].value_counts())
 
-print("\nDistribución por split:")
-print(df["split"].value_counts())
+    print("\nDistribución por clase:")
+    print(df["clase"].value_counts())
 
-print("\nDistribución por clase:")
-print(df["clase"].value_counts())
+    # =====================================================
+    # VISUALIZACIONES
+    # =====================================================
 
+    plot_distribucion_clases(df)
+    plot_train_test(df)
+    plot_muestras(df)
 
-# =========================================================
-# DISTRIBUCIÓN CLASES
-# =========================================================
+    # =====================================================
+    # DETECCIÓN DE CORRUPTAS
+    # =====================================================
 
-plt.figure(figsize=(10, 6))
+    print("\n==============================")
+    print("IMÁGENES CORRUPTAS")
+    print("==============================\n")
 
-df["clase"].value_counts().plot(
-    kind="bar"
-)
+    corruptas = []
 
-plt.title("Distribución de clases")
-plt.xlabel("Clase")
-plt.ylabel("Cantidad")
+    for path in df["path"]:
+        img = cv2.imread(path)
+        if img is None:
+            corruptas.append(path)
 
-plt.xticks(rotation=0)
+    print(f"Cantidad corruptas: {len(corruptas)}")
 
-plt.tight_layout()
-plt.show()
+    # =====================================================
+    # DUPLICADOS
+    # =====================================================
 
+    print("\n==============================")
+    print("DUPLICADOS")
+    print("==============================\n")
 
-# =========================================================
-# TRAIN / TEST
-# =========================================================
+    df["hash"] = df["path"].apply(calcular_hash)
 
-pivot = pd.crosstab(
-    df["clase"],
-    df["split"]
-)
+    duplicados = df[df.duplicated("hash", keep=False)]
 
-pivot.plot(
-    kind="bar",
-    figsize=(10, 6)
-)
+    print(f"Imágenes duplicadas: {len(duplicados)}")
 
-plt.title("Distribución Train/Test")
-plt.xlabel("Clase")
-plt.ylabel("Cantidad")
+    if not duplicados.empty:
+        print(duplicados[["split", "clase", "path"]].head(10))
 
-plt.xticks(rotation=0)
+    # =====================================================
+    # RESOLUCIONES
+    # =====================================================
 
-plt.tight_layout()
-plt.show()
+    print("\n==============================")
+    print("RESOLUCIONES")
+    print("==============================\n")
 
+    alturas, anchos = [], []
 
-# =========================================================
-# DETECCIÓN DE CORRUPTAS
-# =========================================================
+    for path in df["path"]:
+        img = cv2.imread(path)
+        if img is not None:
+            h, w = img.shape[:2]
+            alturas.append(h)
+            anchos.append(w)
 
-print("\n==============================")
-print("IMÁGENES CORRUPTAS")
-print("==============================\n")
+    print(f"Altura promedio: {np.mean(alturas):.2f}")
+    print(f"Ancho promedio: {np.mean(anchos):.2f}")
 
-corruptas = []
+    # =====================================================
+    # INTENSIDAD
+    # =====================================================
 
-for path in df["path"]:
+    print("\n==============================")
+    print("INTENSIDAD")
+    print("==============================\n")
 
-    img = cv2.imread(path)
+    intensidades = []
 
-    if img is None:
+    for path in df["path"]:
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        if img is not None:
+            intensidades.append(np.mean(img))
 
-        corruptas.append(path)
+    plot_intensidad(intensidades)
 
-print(f"Cantidad corruptas: {len(corruptas)}")
+    print(f"Intensidad promedio: {np.mean(intensidades):.2f}")
 
+    # =====================================================
+    # HOG + PCA
+    # =====================================================
 
-# =========================================================
-# DETECCIÓN DUPLICADOS
-# =========================================================
+    print("\n==============================")
+    print("HOG + PCA")
+    print("==============================\n")
 
-print("\n==============================")
-print("DUPLICADOS")
-print("==============================\n")
+    hog_features = []
+    hog_labels = []
 
-df["hash"] = df["path"].apply(
-    calcular_hash
-)
+    for _, row in df.sample(min(400, len(df)), random_state=42).iterrows():
 
-duplicados = df[
-    df.duplicated("hash", keep=False)
-]
+        features = extraer_hog(row["path"])
 
-print(f"Imágenes duplicadas: {len(duplicados)}")
+        if features is not None:
+            hog_features.append(features)
+            hog_labels.append(row["clase"])
 
-if not duplicados.empty:
+    hog_features = np.array(hog_features)
 
-    print("\nPrimeros duplicados:")
+    print(f"HOG shape: {hog_features.shape}")
 
-    print(
-        duplicados[
-            ["split", "clase", "path"]
-        ].head(10)
+    scaler = StandardScaler()
+    hog_scaled = scaler.fit_transform(hog_features)
+
+    pca = PCA(n_components=2)
+    hog_pca = pca.fit_transform(hog_scaled)
+
+    plot_pca(hog_pca, hog_labels)
+
+    # =====================================================
+    # VISUALIZACIÓN HOG
+    # =====================================================
+
+    print("\n==============================")
+    print("VISUALIZACIÓN HOG")
+    print("==============================\n")
+
+    ejemplo = df.iloc[0]["path"]
+
+    img = cv2.imread(ejemplo, cv2.IMREAD_GRAYSCALE)
+    img = cv2.resize(img, IMG_SIZE)
+
+    features, hog_image = hog(
+        img,
+        orientations=9,
+        pixels_per_cell=(8, 8),
+        cells_per_block=(2, 2),
+        visualize=True,
+        block_norm='L2-Hys'
     )
 
+    plot_hog(img, hog_image)
 
-# =========================================================
-# RESOLUCIONES
-# =========================================================
+    # =====================================================
+    # RESUMEN
+    # =====================================================
 
-print("\n==============================")
-print("RESOLUCIONES")
-print("==============================\n")
+    print("\n==============================")
+    print("RESUMEN FINAL")
+    print("==============================\n")
 
-anchos = []
-alturas = []
+    print(f"Total imágenes: {len(df)}")
+    print(df["clase"].value_counts())
 
-for path in df["path"]:
-
-    img = cv2.imread(path)
-
-    if img is not None:
-
-        h, w = img.shape[:2]
-
-        alturas.append(h)
-        anchos.append(w)
-
-print(f"Altura promedio: {np.mean(alturas):.2f}")
-print(f"Ancho promedio: {np.mean(anchos):.2f}")
-
-print(f"Altura mínima: {np.min(alturas)}")
-print(f"Altura máxima: {np.max(alturas)}")
-
-print(f"Ancho mínimo: {np.min(anchos)}")
-print(f"Ancho máximo: {np.max(anchos)}")
+    print("\n✅ Dataset validado correctamente.")
 
 
 # =========================================================
-# MUESTRAS VISUALES
-# =========================================================
 
-print("\n==============================")
-print("MUESTRAS")
-print("==============================\n")
-
-clases = sorted(
-    df["clase"].unique()
-)
-
-fig, axes = plt.subplots(
-    len(clases),
-    3,
-    figsize=(12, 4 * len(clases))
-)
-
-if len(clases) == 1:
-    axes = np.expand_dims(axes, axis=0)
-
-for i, clase in enumerate(clases):
-
-    subset = df[
-        df["clase"] == clase
-    ]
-
-    muestras = subset.sample(3)
-
-    for j, (_, row) in enumerate(
-        muestras.iterrows()
-    ):
-
-        img = cv2.imread(row["path"])
-
-        img = cv2.cvtColor(
-            img,
-            cv2.COLOR_BGR2RGB
-        )
-
-        axes[i, j].imshow(img)
-
-        axes[i, j].axis("off")
-
-        if j == 0:
-
-            axes[i, j].set_title(clase)
-
-plt.tight_layout()
-plt.show()
-
-
-# =========================================================
-# INTENSIDAD PROMEDIO
-# =========================================================
-
-print("\n==============================")
-print("INTENSIDAD")
-print("==============================\n")
-
-intensidades = []
-
-for path in df["path"]:
-
-    img = cv2.imread(
-        path,
-        cv2.IMREAD_GRAYSCALE
-    )
-
-    if img is not None:
-
-        intensidades.append(
-            np.mean(img)
-        )
-
-plt.figure(figsize=(10, 5))
-
-plt.hist(
-    intensidades,
-    bins=30
-)
-
-plt.title("Distribución intensidad")
-plt.xlabel("Intensidad")
-plt.ylabel("Frecuencia")
-
-plt.tight_layout()
-plt.show()
-
-print(
-    f"Intensidad promedio: "
-    f"{np.mean(intensidades):.2f}"
-)
-
-
-# =========================================================
-# ANÁLISIS HOG
-# =========================================================
-
-print("\n==============================")
-print("HOG")
-print("==============================\n")
-
-hog_features = []
-hog_labels = []
-
-for _, row in df.sample(
-    min(400, len(df)),
-    random_state=42
-).iterrows():
-
-    features = extraer_hog(
-        row["path"]
-    )
-
-    if features is not None:
-
-        hog_features.append(features)
-        hog_labels.append(row["clase"])
-
-hog_features = np.array(hog_features)
-
-print(
-    f"Shape HOG: {hog_features.shape}"
-)
-
-print(
-    f"Cantidad features: "
-    f"{hog_features.shape[1]}"
-)
-
-
-# =========================================================
-# PCA HOG
-# =========================================================
-
-print("\n==============================")
-print("PCA HOG")
-print("==============================\n")
-
-scaler = StandardScaler()
-
-hog_scaled = scaler.fit_transform(
-    hog_features
-)
-
-pca = PCA(n_components=2)
-
-hog_pca = pca.fit_transform(
-    hog_scaled
-)
-
-plt.figure(figsize=(10, 8))
-
-for clase in np.unique(hog_labels):
-
-    idx = np.array(hog_labels) == clase
-
-    plt.scatter(
-        hog_pca[idx, 0],
-        hog_pca[idx, 1],
-        label=clase,
-        alpha=0.7
-    )
-
-plt.title("PCA Features HOG")
-plt.xlabel("PCA 1")
-plt.ylabel("PCA 2")
-
-plt.legend()
-
-plt.tight_layout()
-plt.show()
-
-
-# =========================================================
-# HOG VISUAL
-# =========================================================
-
-print("\n==============================")
-print("VISUALIZACIÓN HOG")
-print("==============================\n")
-
-ejemplo = df.iloc[0]["path"]
-
-img = cv2.imread(
-    ejemplo,
-    cv2.IMREAD_GRAYSCALE
-)
-
-img = cv2.resize(
-    img,
-    IMG_SIZE
-)
-
-features, hog_image = hog(
-    img,
-    orientations=9,
-    pixels_per_cell=(8, 8),
-    cells_per_block=(2, 2),
-    visualize=True,
-    block_norm='L2-Hys'
-)
-
-plt.figure(figsize=(12, 5))
-
-plt.subplot(1, 2, 1)
-
-plt.imshow(
-    img,
-    cmap="gray"
-)
-
-plt.title("MRI Original")
-
-plt.axis("off")
-
-plt.subplot(1, 2, 2)
-
-plt.imshow(
-    hog_image,
-    cmap="gray"
-)
-
-plt.title("HOG")
-
-plt.axis("off")
-
-plt.tight_layout()
-plt.show()
-
-
-# =========================================================
-# RESUMEN FINAL
-# =========================================================
-
-print("\n==============================")
-print("RESUMEN")
-print("==============================\n")
-
-print(f"Total imágenes: {len(df)}")
-
-print("\nDistribución final:")
-
-print(df["clase"].value_counts())
-
-print("\nDataset validado correctamente.")
+if __name__ == "__main__":
+    main()

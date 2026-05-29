@@ -9,7 +9,7 @@ from skimage.feature import hog
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 
-ROOT_DIR = Path(__file__).resolve().parents[3]
+ROOT_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT_DIR / 'docs' / 'data' / 'datos'
 PROCESSED_DIR = ROOT_DIR / 'docs' / 'data' / 'processed'
 
