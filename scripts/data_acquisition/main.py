@@ -1,14 +1,14 @@
-import os
-import sys
 import shutil
 from pathlib import Path
-from kaggle.api.kaggle_api_extended import KaggleApi
+
+import kagglehub
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
 DATA_DIR = ROOT_DIR / 'docs' / 'data' / 'datos'
 
 KAGGLE_DATASET = "masoudnickparvar/brain-tumor-mri-dataset"
+
 
 def preparar_dataset_kaggle():
 
@@ -21,56 +21,45 @@ def preparar_dataset_kaggle():
         print("\nDataset ya disponible.", flush=True)
         return
 
-    print("\nPreparando dataset desde Kaggle...", flush=True)
+    print("\nDescargando dataset desde KaggleHub...", flush=True)
 
-    # =========================================
-    # CONFIGURAR CREDENCIALES
-    # =========================================
-
-    kaggle_json = ROOT_DIR / "kaggle.json"
-
-    if not kaggle_json.exists():
-
-        print("\nERROR: kaggle.json no encontrado.", flush=True)
-
-        sys.exit(1)
-
-    kaggle_dir = Path.home() / ".kaggle"
-    kaggle_dir.mkdir(exist_ok=True)
-
-    shutil.copy(
-        kaggle_json,
-        kaggle_dir / "kaggle.json"
+    # Descargar dataset
+    downloaded_path = kagglehub.dataset_download(
+        KAGGLE_DATASET
     )
 
-    try:
-        os.chmod(
-            kaggle_dir / "kaggle.json",
-            0o600
-        )
-    except:
-        pass
+    downloaded_path = Path(downloaded_path)
 
-    # =========================================
-    # DESCARGAR DATASET
-    # =========================================
-
+    # Crear directorio destino
     DATA_DIR.mkdir(
         parents=True,
         exist_ok=True
     )
 
-    api = KaggleApi()
+    # Copiar contenido descargado
+    for item in downloaded_path.iterdir():
 
-    api.authenticate()
+        destino = DATA_DIR / item.name
 
-    api.dataset_download_files(
-        KAGGLE_DATASET,
-        path=str(DATA_DIR),
-        unzip=True
-    )
+        if item.is_dir():
+
+            shutil.copytree(
+                item,
+                destino,
+                dirs_exist_ok=True
+            )
+
+        else:
+
+            shutil.copy2(
+                item,
+                destino
+            )
 
     print(
         "\nDataset descargado correctamente.",
         flush=True
     )
+
+
+preparar_dataset_kaggle()
