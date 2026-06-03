@@ -38,6 +38,5 @@ def preparar_dataset_kaggle():
 
     print("\n✅ Dataset descargado y listo.")
 
-
 if __name__ == "__main__":
     preparar_dataset_kaggle()

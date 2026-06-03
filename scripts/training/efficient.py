@@ -1,15 +1,17 @@
 import sys
 import os
+from pathlib import Path
+import tensorflow as tf
+import time
 
-# 🔥 CONFIGURAR PATH PRIMERO (ANTES DE IMPORTS)
+# =====================================================
+# 🔥 PATH CONFIG
+# =====================================================
+
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src"))
 sys.path.append(ROOT)
 
 print("✅ PATH configurado:", ROOT)
-
-from pathlib import Path
-import tensorflow as tf
-import time
 
 from brain_tumor_classifier.models.efficient import build_efficientnet
 
@@ -18,95 +20,77 @@ from brain_tumor_classifier.models.efficient import build_efficientnet
 # =====================================================
 
 start_total = time.time()
-print("\n🚀 INICIANDO PIPELINE EFFICIENTNET\n")
+print("\n🚀 TRAINING PIPELINE EFFICIENTNET\n")
 
 # =====================================================
 # 📂 RUTAS
 # =====================================================
 
-# 🔥 DEFINIR ROOT DEL PROYECTO
 ROOT_DIR = Path(__file__).resolve().parents[2]
-
 DATA_DIR = ROOT_DIR / "docs" / "data" / "datos"
 
 TRAIN_PATH = DATA_DIR / "Training"
-TEST_PATH = DATA_DIR / "Testing"
 
 print(f"📁 Train dir: {TRAIN_PATH}")
-print(f"📁 Test dir: {TEST_PATH}")
 
 # =====================================================
 # ⚙️ PARÁMETROS
 # =====================================================
 
 IMG_SIZE = (128, 128)
-BATCH_SIZE = 8   # 🔥 más seguro en CPU
+BATCH_SIZE = 8
 EPOCHS = 5
 
 # =====================================================
-# 📦 DATA LOADERS
+# 📥 DATASET (TRAIN + VAL SPLIT)
 # =====================================================
-
-print("\n📥 Cargando datasets...")
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     TRAIN_PATH,
     image_size=IMG_SIZE,
     batch_size=BATCH_SIZE,
-    label_mode='categorical'
+    label_mode='categorical',
+    validation_split=0.2,
+    subset="training",
+    seed=123
 )
 
-test_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    TEST_PATH,
+val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+    TRAIN_PATH,
     image_size=IMG_SIZE,
     batch_size=BATCH_SIZE,
-    label_mode='categorical'
+    label_mode='categorical',
+    validation_split=0.2,
+    subset="validation",
+    seed=123
 )
 
 class_names = train_ds.class_names
 num_classes = len(class_names)
 
-print(f"\n✅ Clases detectadas: {class_names}")
-print(f"🔢 Número de clases: {num_classes}")
+print(f"\n✅ Clases: {class_names}")
 
 # =====================================================
 # 🔄 NORMALIZACIÓN
 # =====================================================
 
-print("\n🔄 Aplicando normalización...")
+norm = tf.keras.layers.Rescaling(1./255)
 
-normalization_layer = tf.keras.layers.Rescaling(1./255)
-
-train_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-test_ds = test_ds.map(lambda x, y: (normalization_layer(x), y))
-
-# =====================================================
-# ⚡ PERFORMANCE
-# =====================================================
-
-AUTOTUNE = tf.data.AUTOTUNE
-
-train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
-test_ds = test_ds.prefetch(buffer_size=AUTOTUNE)
+train_ds = train_ds.map(lambda x, y: (norm(x), y)).prefetch(tf.data.AUTOTUNE)
+val_ds = val_ds.map(lambda x, y: (norm(x), y)).prefetch(tf.data.AUTOTUNE)
 
 # =====================================================
 # 🤖 MODELO
 # =====================================================
-
-print("\n🧠 Construyendo modelo EfficientNet...")
 
 model = build_efficientnet(
     input_shape=(128, 128, 3),
     num_classes=num_classes
 )
 
-model.summary()
-
 # =====================================================
 # 💾 CALLBACKS
 # =====================================================
-
-print("\n💾 Configurando callbacks...")
 
 checkpoint = tf.keras.callbacks.ModelCheckpoint(
     "best_model.h5",
@@ -122,37 +106,17 @@ early_stop = tf.keras.callbacks.EarlyStopping(
 )
 
 # =====================================================
-# 🚀 ENTRENAMIENTO
+# 🚀 TRAINING
 # =====================================================
-
-print("\n🚀 Entrenando modelo...\n")
-
-t0 = time.time()
 
 history = model.fit(
     train_ds,
-    validation_data=test_ds,
+    validation_data=val_ds,
     epochs=EPOCHS,
     callbacks=[checkpoint, early_stop]
 )
 
-print(f"\n⏱️ Tiempo entrenamiento: {time.time() - t0:.2f}s")
-
-# =====================================================
-# 📊 EVALUACIÓN
-# =====================================================
-
-print("\n📊 Evaluando modelo...")
-
-loss, acc = model.evaluate(test_ds)
-
-print(f"\n✅ Accuracy EfficientNet: {acc:.4f}")
-
-# =====================================================
-# 🏁 FIN
-# =====================================================
-
 model.save("models/efficientnet_savedmodel")
 
-print("\n🏁 PIPELINE FINALIZADO")
-print(f"⏱️ Tiempo total: {time.time() - start_total:.2f}s\n")
+print("\n🏁 TRAINING FINALIZADO")
+print(f"⏱️ Tiempo total: {time.time() - start_total:.2f}s")
