@@ -11,7 +11,7 @@ from pathlib import Path
 import tensorflow as tf
 import time
 
-from brain_tumor_classifier.models import efficient
+from brain_tumor_classifier.models.efficient import build_efficientnet
 
 # =====================================================
 # ⏱️ INICIO
@@ -151,6 +151,8 @@ print(f"\n✅ Accuracy EfficientNet: {acc:.4f}")
 # =====================================================
 # 🏁 FIN
 # =====================================================
+
+model.save("models/efficientnet_savedmodel")
 
 print("\n🏁 PIPELINE FINALIZADO")
 print(f"⏱️ Tiempo total: {time.time() - start_total:.2f}s\n")
