@@ -1,34 +1,58 @@
-# Entornos virtuales
+# =========================
+# Environments
+# =========================
 venv/
 .env/
 
-# Python
+# =========================
+# Python cache
+# =========================
 __pycache__/
 *.pyc
 *.pyo
 
-# OS
+# =========================
+# OS files
+# =========================
 .DS_Store
 
-# Modelos y datasets procesados
+# =========================
+# ML Models (IMPORTANT)
+# =========================
+models/
 *.pkl
+*.keras
+*.h5
 
-# Kaggle credentials
-#kaggle.json
-.kaggle/
-
-# Datos descargados
+# =========================
+# Datasets (NO subir data cruda)
+# =========================
+docs/data/
 docs/data/datos/
 docs/data/processed/
 
-# DVC cache
+# =========================
+# Training outputs
+# =========================
+outputs/
+logs/
+
+# =========================
+# Kaggle
+# =========================
+.kaggle/
+
+# =========================
+# DVC
+# =========================
 .dvc/cache/
 
+# =========================
 # Jupyter
+# =========================
 .ipynb_checkpoints/
 
-# VSCode
+# =========================
+# IDE
+# =========================
 .vscode/
-
-# Logs
-*.log
