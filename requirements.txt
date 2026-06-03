@@ -8,3 +8,4 @@ kaggle
 python-dotenv
 dvc[gdrive]
 PyYAML
+tensorflow
