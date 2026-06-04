@@ -17,7 +17,7 @@ __pycache__/
 .DS_Store
 
 # =========================
-# ML Models (IMPORTANT)
+# ML Models
 # =========================
 models/
 *.pkl
@@ -25,9 +25,8 @@ models/
 *.h5
 
 # =========================
-# Datasets (NO subir data cruda)
+# Datasets
 # =========================
-docs/data/
 docs/data/datos/
 docs/data/processed/
 
@@ -41,6 +40,7 @@ logs/
 # Kaggle
 # =========================
 .kaggle/
+kaggle.json
 
 # =========================
 # DVC
@@ -56,3 +56,4 @@ logs/
 # IDE
 # =========================
 .vscode/
+.idea/

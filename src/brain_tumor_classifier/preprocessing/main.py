@@ -5,6 +5,7 @@ from skimage.feature import hog
 
 IMG_SIZE = (128, 128)
 
+
 def procesar_dataset(ruta_dir: Path):
     X, y = [], []
 

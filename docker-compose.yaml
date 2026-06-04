@@ -1,0 +1,17 @@
+services:
+
+  brain-tumor-app:
+
+    build: .
+
+    container_name: brain_tumor_app
+
+    ports:
+      - "8501:8501"
+
+    volumes:
+      - ./docs:/app/docs
+      - ./models:/app/models
+      - ./kaggle.json:/root/.kaggle/kaggle.json
+
+    restart: unless-stopped

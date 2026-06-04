@@ -2,41 +2,43 @@ import os
 from pathlib import Path
 import zipfile
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-DATA_DIR = ROOT_DIR / "docs" / "data" / "datos"
 
-DATASET_NAME = "masoudnickparvar/brain-tumor-mri-dataset"
+def pull_dataset():
 
+    ROOT_DIR = Path(__file__).resolve().parents[2]
+    DATA_DIR = ROOT_DIR / "docs" / "data" / "datos"
 
-def preparar_dataset_kaggle():
+    DATASET_NAME = "masoudnickparvar/brain-tumor-mri-dataset"
 
-    training_dir = DATA_DIR / "Training"
-    testing_dir = DATA_DIR / "Testing"
+    def preparar_dataset_kaggle():
 
-    if training_dir.exists() and testing_dir.exists():
-        print("\n✅ Dataset ya disponible.")
-        return
+        training_dir = DATA_DIR / "Training"
+        testing_dir = DATA_DIR / "Testing"
 
-    print("\n⬇️ Descargando dataset desde Kaggle...")
+        if training_dir.exists() and testing_dir.exists():
+            print("\n✅ Dataset ya disponible.")
+            return
 
-    # Descargar dataset
-    os.system(f"kaggle datasets download -d {DATASET_NAME}")
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    zip_path = ROOT_DIR / "brain-tumor-mri-dataset.zip"
+        print("\n⬇️ Descargando dataset desde Kaggle...")
 
-    if not zip_path.exists():
-        print("\n❌ Error descargando dataset.")
-        return
+        os.system(f"kaggle datasets download -d {DATASET_NAME}")
 
-    print("\n📦 Extrayendo dataset...")
+        zip_path = ROOT_DIR / "brain-tumor-mri-dataset.zip"
 
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(DATA_DIR)
+        if not zip_path.exists():
+            print("\n❌ Error descargando dataset.")
+            return
 
-    # Opcional: borrar zip
-    os.remove(zip_path)
+        print("\n📦 Extrayendo dataset...")
 
-    print("\n✅ Dataset descargado y listo.")
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+            zip_ref.extractall(DATA_DIR)
 
-if __name__ == "__main__":
+        os.remove(zip_path)
+
+        print("\n✅ Dataset descargado y listo.")
+
+    # EJECUTAR LA FUNCIÓN
     preparar_dataset_kaggle()

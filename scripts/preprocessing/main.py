@@ -2,7 +2,7 @@ from pathlib import Path
 import pickle
 import sys
 
-from brain_tumor_classifier.features.preprocessing import procesar_dataset
+from brain_tumor_classifier.preprocessing import procesar_dataset
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
