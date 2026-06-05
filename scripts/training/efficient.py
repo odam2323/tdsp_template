@@ -116,7 +116,7 @@ history = model.fit(
     callbacks=[checkpoint, early_stop]
 )
 
-model.save("models/efficientnet_savedmodel")
+model.save("models/efficientnet.keras")
 
 print("\n🏁 TRAINING FINALIZADO")
 print(f"⏱️ Tiempo total: {time.time() - start_total:.2f}s")
