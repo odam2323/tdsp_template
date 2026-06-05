@@ -31,18 +31,16 @@ Los resultados de la evaluación fueron los siguientes:
  [  2  11   0 387]]
 
 [REPORTE DE CLASIFICACIÓN]
-precision recall f1-score support
+              precision    recall  f1-score   support
 
       glioma       0.97      0.66      0.78       400
-
-meningioma 0.81 0.90 0.86 400
-notumor 0.85 1.00 0.92 400
-pituitary 0.93 0.97 0.95 400
+  meningioma       0.81      0.90      0.86       400
+     notumor       0.85      1.00      0.92       400
+   pituitary       0.93      0.97      0.95       400
 
     accuracy                           0.88      1600
-
-macro avg 0.89 0.88 0.88 1600
-weighted avg 0.89 0.88 0.88 1600
+   macro avg       0.89      0.88      0.88      1600
+weighted avg       0.89      0.88      0.88      1600
 
 ## Análisis de los resultados
 
@@ -53,6 +51,7 @@ Los resultados demuestran que el baseline alcanza un rendimiento global competit
 El modelo baseline cumple con creces el objetivo de establecer un umbral mínimo de comparación, demostrando que los patrones de forma básicos resuelven gran parte del problema pero fallan en los escenarios médicos de alta complejidad. Para mitigar la debilidad diagnóstica observada en la clase Glioma, queda plenamente justificado avanzar hacia el modelo final basado en EfficientNetV2-S, cuya arquitectura convolucional profunda y dinámica aprenderá jerarquías de texturas abstractas y sutiles imposibles de capturar con HOG. El uso de capas de atención en el modelo final será mandatorio para forzar a la red a concentrarse en las microestructuras limítrofes entre Gliomas y Meningiomas, elevando la sensibilidad clínica general.
 
 ## Referencias
+
 
 Lista de referencias utilizadas para construir el modelo baseline y evaluar su rendimiento.
 

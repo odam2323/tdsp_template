@@ -2,7 +2,7 @@ from pathlib import Path
 import pickle
 
 from scripts.data_acquisition.main import pull_dataset
-from brain_tumor_classifier.preprocessing.main import procesar_dataset
+from src.brain_tumor_classifier.preprocessing.main import procesar_dataset
 from scripts.eda.main import run_eda
 
 
