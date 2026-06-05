@@ -48,9 +48,9 @@
 
         -Descargar el token de API de Kaggle (kaggle.json) desde la configuración de la cuenta de Kaggle y ubicarlo en el directorio raíz del proyecto para que el volumen de Docker pueda mapearlo correctamente.
 
-        -Colocar el modelo pre-entrenado dentro del directorio ./models.
+        -Ejecutar el script main.py de forma local o dentro del contenedor si es necesario descargar los datos (pull_dataset) y generar los archivos .pkl de entrenamiento y prueba antes de levantar la interfaz. Así mismo, se entrenarán los modelos, ya que el .gitignore los excluye por el peso de los archivos
 
-        -(Opcional) Ejecutar el script main.py de forma local o dentro del contenedor si es necesario descargar los datos (pull_dataset) y generar los archivos .pkl de entrenamiento y prueba antes de levantar la interfaz.
+        -Colocar el modelo pre-entrenado dentro del directorio ./models (si no se ubicó automáticamente).
 
 - **Instrucciones de uso:**
 

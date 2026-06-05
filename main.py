@@ -1,5 +1,7 @@
 from pathlib import Path
+import sys
 import pickle
+import subprocess
 
 from scripts.data_acquisition.main import pull_dataset
 from src.brain_tumor_classifier.preprocessing.main import procesar_dataset
@@ -41,6 +43,40 @@ def main():
     print("=" * 50)
 
     run_eda()
+
+    print("\n" + "=" * 50)
+    print("ENTRENAMIENTO (No incluido dado el .gitignore)")
+    print("=" * 50)
+
+    script_path_entrenamiento_efficient = Path("scripts/training/efficient.py")
+
+    subprocess.run([sys.executable, str(script_path_entrenamiento_efficient)])
+
+    print("EfficientNet entrenada")
+
+    script_path_entrenamiento_svm = Path("scripts/training/svm.py")
+
+    subprocess.run([sys.executable, str(script_path_entrenamiento_svm)])
+
+    print("SVM entrenada")
+
+    print("\n" + "=" * 50)
+    print("PRUEBA")
+    print("=" * 50)
+
+    script_path_prueba_efficient = Path("scripts/evaluation/efficient.py")
+
+    subprocess.run([sys.executable, str(script_path_prueba_efficient)])
+
+    print("EfficientNet testeada")
+
+    script_path_prueba_svm = Path("scripts/evaluation/svm.py")
+
+    subprocess.run([sys.executable, str(script_path_prueba_svm)])
+
+    print("SVM testeada")
+
+
 
     print("\nPipeline completado")
 
