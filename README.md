@@ -37,33 +37,7 @@ glioma
 meningioma
 notumor
 pituitary
-Estructura del proyecto
-tdsp_template/
-│
-├── docs/
-│   ├── data/
-│   ├── business_understanding/
-│   ├── modeling/
-│   └── deployment/
-│
-├── scripts/
-│   ├── data_acquisition/
-│   ├── preprocessing/
-│   ├── eda/
-│   ├── training/
-│   └── evaluation/
-│
-├── src/
-│   └── brain_tumor_classifier/
-│
-├── models/
-│
-├── app_streamlit.py
-├── main.py
-├── requirements.txt
-├── Dockerfile
-└── docker-compose.yml
-Pipeline
+
 
 El pipeline completo ejecuta:
 
